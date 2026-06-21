@@ -1,3 +1,5 @@
+java -jar target/url-shortener.jar
+
 # URL Shortener — Production-Style Spring Boot 3 / Java 21 / MySQL Project
 
 A fully-layered, production-style URL shortener built with Java 21, Spring Boot 3,
