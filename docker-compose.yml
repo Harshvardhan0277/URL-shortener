@@ -1,0 +1,69 @@
+# ==============================================================================
+# docker-compose.yml — spins up the URL shortener app AND a real MySQL
+# database together with a single command: `docker compose up`.
+# ==============================================================================
+# WHY DOCKER COMPOSE FOR LOCAL/DEMO USE:
+#   Without it, a developer would need to separately install MySQL,
+#   manually create the database/user, configure connection strings, AND
+#   separately build/run the Spring Boot app — multiple manual,
+#   error-prone, non-reproducible steps. Compose declares the ENTIRE
+#   multi-container topology (app + database + the network connecting
+#   them + persistent storage) as one version-controlled file that works
+#   identically on any machine with Docker installed.
+# ==============================================================================
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: url-shortener-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: url_shortener
+    ports:
+      - "3306:3306"   # exposed to the host too, so you can connect with a
+                       # local MySQL client/GUI tool for debugging if desired
+    volumes:
+      # Named volume persists MySQL's actual data files OUTSIDE the
+      # container's writable layer, so data survives `docker compose down`
+      # (only `docker compose down -v` would actually delete this volume
+      # and the data with it).
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      # Compose uses this to know when MySQL is ACTUALLY ready to accept
+      # connections (simply having the container "started" doesn't mean
+      # the MySQL server process inside has finished initializing yet) —
+      # the app service below waits on this healthcheck via
+      # `depends_on.condition: service_healthy`.
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: url-shortener-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # These map directly onto the ${DB_URL}, ${DB_USERNAME}, etc.
+      # placeholders in application.yml (Spring Boot automatically maps
+      # environment variables onto configuration properties). Notice the
+      # hostname here is "mysql" (the service name above), NOT
+      # "localhost" — Compose gives each service a DNS name on its
+      # internal network equal to the service's name in this file.
+      DB_URL: jdbc:mysql://mysql:3306/url_shortener?useSSL=false&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      APP_BASE_URL: http://localhost:8080
+      DDL_AUTO: update
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

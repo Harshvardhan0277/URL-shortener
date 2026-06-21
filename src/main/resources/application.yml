@@ -1,0 +1,94 @@
+# ==============================================================================
+# application.yml — Central configuration file for Spring Boot
+# ==============================================================================
+# Spring Boot automatically loads this file from src/main/resources at startup.
+# Every value here can be OVERRIDDEN at runtime via environment variables
+# (e.g. SPRING_DATASOURCE_PASSWORD=secret java -jar app.jar) which is how we
+# keep real passwords OUT of source control in production (12-factor app style).
+# ==============================================================================
+
+server:
+  port: 8080                     # The embedded Tomcat will listen on this port
+
+spring:
+  application:
+    name: url-shortener
+
+  # ----------------------------------------------------------------------------
+  # DATASOURCE — how Spring connects to MySQL
+  # ----------------------------------------------------------------------------
+  datasource:
+    # JDBC URL anatomy:
+    #   jdbc:mysql://<host>:<port>/<database>?<options>
+    #   useSSL=false            -> disable SSL for local dev (enable in prod!)
+    #   serverTimezone=UTC      -> avoids timezone-mismatch bugs between app & DB
+    #   createDatabaseIfNotExist=true -> convenience for local/dev environments
+    url: ${DB_URL:jdbc:mysql://localhost:3306/url_shortener?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:heyitsme!123}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    # HikariCP is the default connection pool bundled with Spring Boot.
+    # A "connection pool" keeps a set of already-open TCP connections to MySQL
+    # ready to reuse, because opening a brand-new DB connection per request is
+    # expensive (TCP handshake + MySQL auth handshake every time).
+    hikari:
+      maximum-pool-size: 10       # max simultaneous DB connections this app instance may hold
+      minimum-idle: 2             # keep at least 2 warm connections even when idle
+      connection-timeout: 30000   # ms to wait for a free connection before failing fast
+
+  # ----------------------------------------------------------------------------
+  # JPA / HIBERNATE
+  # ----------------------------------------------------------------------------
+  jpa:
+    hibernate:
+      # ddl-auto controls whether Hibernate creates/updates tables for us.
+      #   "update"   -> dev-friendly: Hibernate inspects our @Entity classes and
+      #                 creates missing tables/columns. NEVER use in real prod
+      #                 (no safe rollback, can silently alter live schema).
+      #   "validate" -> prod-friendly: Hibernate just checks our entities match
+      #                 the schema (created via schema.sql or a migration tool
+      #                 like Flyway/Liquibase) and fails fast if they don't.
+      # We default to "update" for easy local demoing, but document the
+      # production recommendation clearly in the README.
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: true                # print every generated SQL statement to the console
+    properties:
+      hibernate:
+        format_sql: true          # pretty-print that SQL across multiple lines
+        # Tells Hibernate which SQL "dialect" (flavor) to generate — affects
+        # things like how AUTO_INCREMENT / LIMIT / data types are written.
+        dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+    # ^ IMPORTANT DESIGN DECISION:
+    # "Open Session In View" (OSIV) keeps a Hibernate session open for the
+    # entire HTTP request, including while the view/JSON is being rendered.
+    # This is convenient but dangerous: it hides N+1 query bugs and can leak
+    # DB connections under load. We disable it and instead make sure every
+    # entity needed by a controller is FULLY loaded inside the @Transactional
+    # service method (see UrlServiceImpl) before it's returned.
+
+  # Multipart/servlet defaults are left as Spring Boot defaults; nothing
+  # file-upload related is needed for this project.
+
+# ------------------------------------------------------------------------------
+# CUSTOM APPLICATION PROPERTIES — our own configuration namespace
+# ------------------------------------------------------------------------------
+# Spring Boot lets us invent our own config keys under any prefix we like.
+# We read these via @Value(...) in RateLimitConfig and UrlServiceImpl.
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}   # used to build the full short URL returned to clients
+  rate-limit:
+    capacity: 20          # max number of requests a single IP may have "banked" at once
+    refill-tokens: 20     # how many tokens get added back...
+    refill-duration-seconds: 60   # ...every this many seconds (i.e. 20 requests / minute / IP)
+
+# ------------------------------------------------------------------------------
+# LOGGING
+# ------------------------------------------------------------------------------
+logging:
+  level:
+    root: INFO
+    com.example.urlshortener: DEBUG          # verbose logs for OUR code while developing
+    org.hibernate.SQL: DEBUG                 # show generated SQL (redundant with show-sql but useful with a real logger)
+    org.hibernate.orm.jdbc.bind: TRACE       # show the actual ?-parameter VALUES bound into SQL (very handy for debugging)

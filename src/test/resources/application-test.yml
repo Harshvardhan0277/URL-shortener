@@ -1,0 +1,31 @@
+# ==============================================================================
+# application-test.yml — configuration profile used only during automated
+# tests (activated via @ActiveProfiles("test") on a full @SpringBootTest, or
+# automatically by Maven's Surefire test phase if configured to do so).
+# ==============================================================================
+# Our current test suite (UrlServiceImplTest with pure Mockito mocks, and
+# UrlControllerTest with @WebMvcTest) doesn't actually need a database at
+# all — neither loads a real ApplicationContext with a DataSource. This file
+# is included to demonstrate the CORRECT, idiomatic pattern a team would
+# use the moment they add a true integration test (e.g. a @DataJpaTest for
+# UrlMappingRepository, or a full @SpringBootTest end-to-end test) — point
+# it at H2 instead of real MySQL so the full test suite runs fast and
+# requires zero external infrastructure in CI.
+# ==============================================================================
+spring:
+  datasource:
+    url: jdbc:h2:mem:url_shortener_test;DB_CLOSE_DELAY=-1;MODE=MySQL
+    # MODE=MySQL makes H2 emulate MySQL-specific SQL syntax/behavior more
+    # closely, reducing the chance that a query passes against H2 in tests
+    # but fails against real MySQL in production (or vice versa).
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      # create-drop: build the schema fresh from our @Entity classes at
+      # test-context startup, and tear it down at shutdown — perfect for
+      # disposable, isolated test runs (the opposite of production, where
+      # we use "validate" against a real migration-managed schema).
+    show-sql: true
