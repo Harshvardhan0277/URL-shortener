@@ -1,5 +1,7 @@
 package com.example.urlshortener.dto;
 
+import java.time.LocalDateTime;
+
 /**
  * ==============================================================================
  * TopUrlResponse — DTO representing one entry in the "top URLs by clicks"
@@ -14,6 +16,7 @@ package com.example.urlshortener.dto;
 public record TopUrlResponse(
         String shortCode,
         String originalUrl,
-        long clickCount
+        long clickCount,
+        LocalDateTime createdAt
 ) {
 }

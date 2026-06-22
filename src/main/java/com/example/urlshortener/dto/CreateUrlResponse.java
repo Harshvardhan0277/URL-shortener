@@ -20,6 +20,8 @@ public record CreateUrlResponse(
         String shortCode,      // e.g. "b7F3a"
         String shortUrl,       // e.g. "http://localhost:8080/b7F3a" — ready to share/click
         String originalUrl,    // echoed back so the client can confirm what was shortened
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        long clickCount,       // typically 0 for newly created URLs, populated if URL was already shortened
+        LocalDateTime lastAccessedAt  // null if never clicked
 ) {
 }

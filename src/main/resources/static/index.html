@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener - Create & Track Short Links</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-lg">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-link me-2"></i>LinkCutter
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#shortcuts">Create Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#analytics">Analytics</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container-lg text-center">
+            <h1 class="display-4 fw-bold text-white mb-3">
+                <i class="fas fa-scissors text-primary"></i> URL Shortener
+            </h1>
+            <p class="lead text-light mb-4">Transform long URLs into short, shareable links with analytics tracking</p>
+        </div>
+    </section>
+
+    <main class="container-lg py-5">
+        <!-- URL Shortening Section -->
+        <section id="shortcuts" class="mb-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow-lg border-0 rounded-4">
+                        <div class="card-body p-5">
+                            <h2 class="card-title mb-4">
+                                <i class="fas fa-magic text-primary me-2"></i>Create Short Link
+                            </h2>
+                            
+                            <form id="urlForm" class="mb-4">
+                                <div class="input-group input-group-lg mb-3">
+                                    <input 
+                                        type="url" 
+                                        class="form-control" 
+                                        id="originalUrl" 
+                                        placeholder="Enter your long URL here..."
+                                        required
+                                        aria-label="Original URL">
+                                    <button class="btn btn-primary" type="submit" id="submitBtn">
+                                        <i class="fas fa-cut me-2"></i>Shorten
+                                    </button>
+                                </div>
+                                <div id="urlError" class="alert alert-danger d-none" role="alert"></div>
+                            </form>
+
+                            <!-- Result Display -->
+                            <div id="resultContainer" class="d-none">
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <span id="successMsg"></span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                
+                                <div class="result-box p-4 bg-light rounded-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <p class="text-muted small mb-2">Short URL:</p>
+                                            <p class="short-url-display mb-0">
+                                                <strong id="shortUrlDisplay"></strong>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                            <button class="btn btn-outline-primary btn-sm" id="copyBtn">
+                                                <i class="fas fa-copy me-1"></i>Copy
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" id="analyzeBtn">
+                                                <i class="fas fa-chart-bar me-1"></i>Analytics
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="quickStats" class="row mt-4 d-none">
+                                    <div class="col-sm-6 col-md-3">
+                                        <div class="stat-card">
+                                            <div class="stat-number" id="totalClicks">0</div>
+                                            <div class="stat-label">Total Clicks</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3">
+                                        <div class="stat-card">
+                                            <div class="stat-number" id="createdDate">—</div>
+                                            <div class="stat-label">Created</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3">
+                                        <div class="stat-card">
+                                            <div class="stat-number" id="lastClickDate">—</div>
+                                            <div class="stat-label">Last Click</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3">
+                                        <div class="stat-card">
+                                            <div class="stat-number" id="shortCodeDisplay">—</div>
+                                            <div class="stat-label">Short Code</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="analytics" class="mb-5">
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-10">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-chart-line text-primary me-2"></i>Analytics Dashboard
+                    </h2>
+
+                    <!-- Individual URL Analytics -->
+                    <div class="card shadow-lg border-0 rounded-4 mb-4">
+                        <div class="card-body p-5">
+                            <h5 class="card-title mb-4">
+                                <i class="fas fa-search me-2"></i>Track Specific URL
+                            </h5>
+                            
+                            <div class="input-group mb-3">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="analyticsSearchCode" 
+                                    placeholder="Enter short code (e.g., abc123)...">
+                                <button class="btn btn-info" type="button" id="searchAnalyticsBtn">
+                                    <i class="fas fa-search me-1"></i>Search
+                                </button>
+                            </div>
+
+                            <div id="analyticsError" class="alert alert-danger d-none" role="alert"></div>
+                            <div id="analyticsResult" class="d-none">
+                                <div class="analytics-detail-box">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <p class="text-muted mb-1">Short Code:</p>
+                                            <p class="h5 mb-0"><span id="analyticsShortCode"></span></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted mb-1">Total Clicks:</p>
+                                            <p class="h5 mb-0"><span id="analyticsClicks" class="text-primary"></span></p>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <p class="text-muted mb-1">Created:</p>
+                                            <p class="mb-0"><span id="analyticsCreated"></span></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted mb-1">Last Accessed:</p>
+                                            <p class="mb-0"><span id="analyticsLastAccessed"></span></p>
+                                        </div>
+                                    </div>
+                                    <hr class="my-3">
+                                    <p class="text-muted small mb-2">Original URL:</p>
+                                    <p class="original-url-display"><span id="analyticsOriginalUrl"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top URLs -->
+                    <div class="card shadow-lg border-0 rounded-4">
+                        <div class="card-body p-5">
+                            <h5 class="card-title mb-4">
+                                <i class="fas fa-fire text-danger me-2"></i>Top URLs (Most Clicked)
+                            </h5>
+                            
+                            <div id="topUrlsList" class="top-urls-container">
+                                <div class="d-flex justify-content-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container-lg">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-link text-primary me-2"></i>LinkCutter
+                    </h5>
+                    <p class="text-muted">Fast, reliable URL shortening with powerful analytics.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h6 class="fw-bold mb-3">Features</h6>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Instant URL Shortening</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Click Tracking</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Analytics Dashboard</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">API Documentation</h6>
+                    <p class="text-muted small">POST /api/urls - Create short link<br>
+                    GET /api/analytics/{code} - Get URL analytics<br>
+                    GET /api/analytics/top - Top URLs</p>
+                </div>
+            </div>
+            <hr class="border-secondary my-4">
+            <div class="text-center text-muted">
+                <p>&copy; 2024 URL Shortener. Built with ❤️ using Spring Boot & Bootstrap.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

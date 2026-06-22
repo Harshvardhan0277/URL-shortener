@@ -85,7 +85,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         List<UrlMapping> topMappings = urlMappingRepository.findTopUrls(pageable);
 
         return topMappings.stream()
-                .map(m -> new TopUrlResponse(m.getShortCode(), m.getOriginalUrl(), m.getClickCount()))
+                .map(m -> new TopUrlResponse(m.getShortCode(), m.getOriginalUrl(), m.getClickCount(), m.getCreatedAt()))
                 .toList();
     }
 }

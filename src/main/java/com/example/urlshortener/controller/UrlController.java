@@ -38,8 +38,8 @@ import java.net.URI;
  * ------------------------------------------------------------------------------
  * A class-level prefix applied to every method's mapping below. We use the
  * root path "/" here (rather than e.g. "/api") specifically because the
- * redirect endpoint needs to live at the bare root (GET /{shortCode}, e.g.
- * "http://localhost:8080/b7F3a") to produce the shortest, most shareable
+ * redirect endpoint needs to live at a memorable root path (GET /r/{shortCode}, e.g.
+ * "http://localhost:8080/r/b7F3a") to produce the shortest, most shareable
  * URLs — that's the entire point of a URL shortener. The creation endpoint
  * is still explicitly mapped under /api/urls below for a clean separation
  * between "API for managing links" and "the public redirect surface."
@@ -108,14 +108,14 @@ public class UrlController {
     }
 
     /**
-     * GET /{shortCode}
+     * GET /r/{shortCode}
      * ------------------------------------------------------------------------
      * The actual redirect endpoint — this is what a user's browser hits
      * when they click a shortened link.
      *
-     * Mapped at the ROOT level (no /api prefix) specifically so generated
-     * short URLs are as short and clean as possible: "host/b7F3a" instead
-     * of "host/api/urls/b7F3a".
+     * Mapped at the /r/ path for a clean, memorable redirect surface (e.g.
+     * "host/r/b7F3a" instead of just "host/b7F3a"), which allows static
+     * files at the root to coexist with this redirect endpoint.
      *
      * @PathVariable("shortCode") String shortCode binds the {shortCode}
      * segment of the URL path directly into this method parameter.
@@ -135,7 +135,7 @@ public class UrlController {
      *     exactly the semantics we want: every single click MUST hit our
      *     server again so we can record it.
      */
-    @GetMapping("/{shortCode}")
+    @GetMapping("/r/{shortCode}")
     public ResponseEntity<Void> redirect(@PathVariable String shortCode, HttpServletRequest request) {
         // Extract client metadata for the ClickEvent audit row. This is THE
         // ONE place in the whole codebase allowed to touch the raw

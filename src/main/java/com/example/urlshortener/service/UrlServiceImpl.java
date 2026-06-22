@@ -173,7 +173,9 @@ public class UrlServiceImpl implements UrlService {
                     mapping.getShortCode(),
                     baseUrl + "/" + mapping.getShortCode(),
                     mapping.getOriginalUrl(),
-                    mapping.getCreatedAt()
+                    mapping.getCreatedAt(),
+                    mapping.getClickCount(),
+                    mapping.getLastAccessedAt()
             );
             return new CreateUrlResult(response, true); // true = already existed, nothing new created
         }
@@ -224,7 +226,9 @@ public class UrlServiceImpl implements UrlService {
                 updated.getShortCode(),
                 fullShortUrl,
                 updated.getOriginalUrl(),
-                updated.getCreatedAt()
+                updated.getCreatedAt(),
+                updated.getClickCount(),
+                updated.getLastAccessedAt()
         );
         return new CreateUrlResult(response, false); // false = a brand-new row was created
     }

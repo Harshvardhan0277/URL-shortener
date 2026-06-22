@@ -75,7 +75,9 @@ class UrlControllerTest {
                 "abc123",
                 "http://localhost:8080/abc123",
                 "https://www.example.com/path",
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                0,  // clickCount - new URL has no clicks yet
+                null  // lastAccessedAt - never accessed
         );
         // alreadyExisted = false -> controller must return 201 Created
         when(urlService.createShortUrl(any(CreateUrlRequest.class)))
@@ -104,7 +106,9 @@ class UrlControllerTest {
                 "abc123",
                 "http://localhost:8080/abc123",
                 "https://www.example.com/path",
-                LocalDateTime.now().minusDays(1)
+                LocalDateTime.now().minusDays(1),
+                0,  // clickCount
+                null  // lastAccessedAt - if it exists, typically it was created but maybe never clicked
         );
         when(urlService.createShortUrl(any(CreateUrlRequest.class)))
                 .thenReturn(new CreateUrlResult(existingResponse, true));

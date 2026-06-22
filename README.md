@@ -13,7 +13,8 @@ interview.
 
 ## 1. Project Structure
 
-```
+```00000000
+
 url-shortener/
 ├── pom.xml                          # Maven build file (Java 21, Spring Boot 3, Bucket4j)
 ├── Dockerfile                       # Multi-stage build -> small runtime image
@@ -145,7 +146,7 @@ curl -i -X POST http://localhost:8080/api/urls \
 ```json
 {
   "shortCode": "21",
-  "shortUrl": "http://localhost:8080/21",
+  "shortUrl": "http://localhost:8080/r/21",
   "originalUrl": "https://www.example.com/some/very/long/path?query=1",
   "createdAt": "2026-06-20T10:15:30.123"
 }
@@ -164,16 +165,16 @@ before — no duplicate row is created.
 
 ### 4.2 Use the short URL (redirect)
 ```bash
-curl -i http://localhost:8080/21
+curl -i http://localhost:8080/r/21
 # HTTP/1.1 302 Found
 # Location: https://www.example.com/some/very/long/path?query=1
 ```
 Note `-i` (not `-L`) so curl **shows** the redirect response instead of
 silently following it — useful for verifying the 302 status and `Location`
-header directly. In a browser, simply visiting `http://localhost:8080/21`
+header directly. In a browser, simply visiting `http://localhost:8080/r/21`
 redirects automatically.
 
-**Postman:** GET `http://localhost:8080/21` with "Automatically follow
+**Postman:** GET `http://localhost:8080/r/21` with "Automatically follow
 redirects" turned OFF in Settings, to inspect the raw 302 response.
 
 ### 4.3 Get analytics for one short URL
@@ -206,7 +207,7 @@ curl -s "http://localhost:8080/api/analytics/top?limit=5" | jq
 ### 4.5 Error examples
 ```bash
 # 404 — unknown short code
-curl -i http://localhost:8080/doesNotExist
+curl -i http://localhost:8080/r/doesNotExist
 
 # 400 — validation failure (blank URL)
 curl -i -X POST http://localhost:8080/api/urls \
