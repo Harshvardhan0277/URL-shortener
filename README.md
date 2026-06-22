@@ -387,3 +387,82 @@ server to be recorded.
 - Caching the hottest short codes in Redis in front of MySQL to reduce
   database load on the redirect hot path even further.
 - Async click recording via a message queue for extreme-scale throughput.
+
+
+
+## order
+Phase 1 — Orientation (5 min)
+
+README.md — just the "Project Structure" and "How Short Codes Are Generated" sections. Skip the interview Q&A for now; you'll appreciate it more after you've read the code.
+UrlShortenerApplication.java — tiny file, just to see @SpringBootApplication and understand "this is where the app boots from."
+
+Phase 2 — Config & build (10 min)
+
+pom.xml — see what libraries the project actually depends on (Spring Web, JPA, MySQL driver, Bucket4j).
+application.yml — see how the DB connection, JPA, and rate-limit settings are configured.
+
+You don't need to memorize these — just get a feel for "what knobs exist."
+Phase 3 — The data model (the nouns of the system)
+
+schema.sql — read this before the entities. It's plain SQL, easier to reason about than annotations.
+entity/UrlMapping.java
+entity/ClickEvent.java
+
+After this phase you should be able to answer: why is shortCode nullable? Why is ClickEvent a separate table instead of extra columns on UrlMapping?
+Phase 4 — Core algorithms (small, self-contained, satisfying)
+
+util/Base62Encoder.java — the actual short-code math.
+util/UrlHasher.java — why we hash URLs for the duplicate check.
+
+These are isolated utility classes with no Spring magic — good places to build confidence early.
+Phase 5 — The API contract
+
+dto/CreateUrlRequest.java
+dto/CreateUrlResponse.java
+dto/UrlAnalyticsResponse.java
+dto/TopUrlResponse.java
+dto/ErrorResponse.java
+
+Quick reads — just records with validation annotations. Notice they never expose the entity directly.
+Phase 6 — Repository layer
+
+repository/UrlMappingRepository.java — pay close attention to findByIdForUpdate (the locking comment) and findFirstByOriginalUrlHashAndOriginalUrl.
+repository/ClickEventRepository.java
+
+Phase 7 — Error handling
+
+exception/UrlNotFoundException.java, InvalidUrlException.java, RateLimitExceededException.java (quick)
+exception/GlobalExceptionHandler.java
+
+Phase 8 — Service layer (the heart of the project — go slow here)
+
+service/UrlService.java (the interface, just the contract)
+service/CreateUrlResult.java (tiny)
+service/UrlServiceImpl.java — this is the most important file in the whole project. Read createShortUrl and resolveAndRecordClick line by line.
+service/AnalyticsService.java + AnalyticsServiceImpl.java
+
+Phase 9 — Web layer
+
+controller/UrlController.java
+controller/AnalyticsController.java
+
+By now controllers should feel almost boring to read — that's the point of a thin controller layer.
+Phase 10 — Cross-cutting concern: rate limiting
+
+config/RateLimitConfig.java
+config/RateLimitFilter.java
+
+Saved for later deliberately — it's a Filter, which sits outside the normal controller→service→repository flow, so it's easier to understand once you already know what that normal flow looks like.
+Phase 11 — Tests (great way to consolidate everything)
+
+test/.../UrlServiceImplTest.java
+test/.../UrlControllerTest.java
+
+Try covering a method with your hand and predicting what the test asserts before looking.
+Phase 12 — Deployment + tie it together
+
+Dockerfile, docker-compose.yml
+Go back to README.md's "Interview Q&A" section last — at this point every question should make sense, and it's a good self-check.
+
+
+One suggestion: after Phase 8, try tracing a single request end-to-end on paper — POST /api/urls → UrlController → UrlServiceImpl.createShortUrl → repository → back up. That single trace ties Phases 6–9 together better than reading the files in isolation.
